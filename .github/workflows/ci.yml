@@ -22,40 +22,40 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
+      # Install backend dependencies
       - name: Install Backend Dependencies
         run: cd backend && npm install
 
+      # Start MongoDB service
       - name: Start MongoDB
         uses: supercharge/mongodb-github-action@1.8.0
         with:
           mongodb-version: "6.0"
 
-      # --- FIX IS HERE ---
+      # Fix permissions for scripts
       - name: Add execute permission to scripts
         run: |
           chmod +x backend/node_modules/.bin/jest
           chmod +x backend/node_modules/.bin/cucumber-js
-      # --------------------
+
+      # Run backend tests
       - name: Run Backend Tests (Unit & BDD)
         run: |
           cd backend
           npm test
           npm run test:bdd
         env:
-          MONGO_URI: mongodb://localhost:27017/testdb # Use the service DB
+          MONGO_URI: mongodb://localhost:27017/testdb
 
-      - name: Check Frontend Directory Exists
-        run: |
-          if [ ! -f "frontend/package.json" ]; then
-            echo "frontend/package.json not found. Skipping frontend steps."
-            exit 0
-          fi
-
+      # Frontend steps (only if package.json exists)
       - name: Install Frontend Dependencies
+        if: hashFiles('frontend/package.json') != ''
         run: cd frontend && npm install
 
       - name: Run Frontend Tests
+        if: hashFiles('frontend/package.json') != ''
         run: cd frontend && npm test
         env:
-          CI: true # Run tests in non-interactive mode
+          CI: true
+
 
