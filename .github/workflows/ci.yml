@@ -47,7 +47,7 @@ jobs:
         env:
           MONGO_URI: mongodb://localhost:27017/testdb
 
-      # Frontend steps (only if package.json exists)
+      # Frontend steps
       - name: Install Frontend Dependencies
         if: hashFiles('frontend/package.json') != ''
         run: cd frontend && npm install
@@ -58,4 +58,11 @@ jobs:
         env:
           CI: true
 
-
+      # ------------------------
+      # SonarQube Scan
+      # ------------------------
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
